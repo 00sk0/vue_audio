@@ -8,6 +8,14 @@
           <!-- :src="audio_src" -->
         <input type="file" id="audiofile" accept="audio/*" v-on:change="loadAudio">
       </p>
+      <p>
+        <span v-for="cp in components" :key="cp.name">
+          <input type="checkbox" :id="cp.name" v-model="cp.cont.on" />
+          <label :for="cp.name">{{ cp.name }}</label>
+        </span>
+        |
+        Accum_interval: <input type="text" v-model="components[0].cont.span">
+      </p>
       <p>filter: {{filtering ? "on" : "off"}}.
         <button v-on:click="toggle">toggle</button></p>
       <p>
@@ -21,6 +29,9 @@
 
 <script>
 import Main from './lib/main'
+import SpectrumBar from "./lib/spectrum_bar";
+import SpectrumCircle from "./lib/spectrum_circle"
+import SpectrumAccum from "./lib/spectrum_accum"
 
 export default {
   name: 'Visualizer',
@@ -33,6 +44,11 @@ export default {
         amp: 500,
         lfreq: 50,
       },
+      components: [
+        {name: "Accum",  cont: new SpectrumAccum()},
+        {name: "Bar",    cont: new SpectrumBar()},
+        {name: "Circle", cont: new SpectrumCircle()},
+      ]
       // audio_src: require("../assets/test.wav"),
     }
   },
@@ -44,6 +60,12 @@ export default {
         width: cv.width,
         height: cv.height,
         ctx: cv.getContext("2d"),
+        // components: [
+        //   new SpectrumAccum(),
+        //   new SpectrumBar(),
+        //   new SpectrumCircle()
+        // ],
+        components: this.components.map(({cont}) => cont),
         audio
       })
     }, {once: true});
@@ -69,7 +91,7 @@ export default {
     },
     toggle () {
       this.filtering = this.ist.toggle_filter(this.filter.center,this.filter.amp,this.filter.lfreq);
-    }
+    },
   }
 }
 </script>

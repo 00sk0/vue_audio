@@ -6,9 +6,11 @@ export default class extends Component {
     this.idx = 0;
     this.count = 0;
     this.cells = 64;
+
+    this.span = 4;
   }
   draw_internal ({buf_freq_log}) {
-    if(this.count++ > 3) {
+    if(this.count++ >= this.span) {
       this.count = 0;
       this.accum[this.idx] = [];
       for(let i=0; i<this.length; i++) {

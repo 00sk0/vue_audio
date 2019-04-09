@@ -1,12 +1,10 @@
-import SpectrumBar from "./spectrum_bar";
-import SpectrumCircle from "./spectrum_circle"
-import SpectrumAccum from "./spectrum_accum"
+
 
 export default class {
   constructor () {
     this.fft_size = 1024;
   }
-  init ({width,height,ctx,audio}) {
+  init ({width,height,ctx,audio,components}) {
     this.width = width;
     this.height = height;
     this.cctx = ctx;
@@ -18,7 +16,7 @@ export default class {
     this.buf_time = new Uint8Array(LEN);
     this.buf_freq = new Uint8Array(LEN);
     this.buf_freq_log = new Uint8Array(LOGLEN);
-    this.components = this.init_components(xs);
+    this.components = this.init_components(xs, components);
 
     this.filtering = false;
     this.loop ();
@@ -49,12 +47,10 @@ export default class {
     this.filter_lfreq = 0;
     this.audio = audio;
   }
-  init_components (pos_log) {
-    const components = [];
+  init_components (pos_log, comp_init) {
     const [LEN,LOGLEN] = [this.length,this.length_log];
     const pos_linear = Array.from({length:LEN}, (v,i) => i*this.width/LEN);
     pos_linear.push(this.width);
-    // eslint-disable-next-line
     const arg_linear = {
       width: this.width,
       height: this.height,
@@ -69,10 +65,13 @@ export default class {
       pos: pos_log,
       ctx: this.cctx
     };
-    components.push(new SpectrumAccum(arg_log));
-    components.push(new SpectrumBar(arg_log));
-    components.push(new SpectrumCircle(arg_log));
-    return components;
+    const args = {arg_linear, arg_log};
+    // const components = [];
+    // components.push(new SpectrumAccum(arg_log));
+    // components.push(new SpectrumBar(arg_log));
+    // components.push(new SpectrumCircle(arg_log));
+    // return components;
+    return comp_init.map(cp => {cp.init(args); return cp});
   }
   update_filter (freq_center,freq_amp,freq_freq) {
     this.filter_center = freq_center;
