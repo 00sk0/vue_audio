@@ -38,12 +38,15 @@ export default {
   },
   mounted () {
     const cv = document.getElementById("canvas");
-    this.ist.init ({
-      width: cv.width,
-      height: cv.height,
-      ctx: cv.getContext("2d"),
-      audio: document.getElementById("audiosource")
-    });
+    const audio = document.getElementById("audiosource");
+    audio.addEventListener("play", () => {
+      this.ist.init ({
+        width: cv.width,
+        height: cv.height,
+        ctx: cv.getContext("2d"),
+        audio
+      })
+    }, {once: true});
   },
   watch: {
     filter: {
@@ -54,13 +57,15 @@ export default {
     }
   },
   methods: {
-    loadAudio (event_newfile) {
+    loadAudio (ev) {
       const reader = new FileReader();
-      reader.onload = function(event_readfile) {
-        const file = event_readfile.target.result;
-        document.getElementById("audiosource").src = file;
+      const file = ev.target.files[0];
+      if(!file || !file.type.match("audio.*")) return;
+      reader.onload = function(ev) {
+        const content = ev.target.result;
+        document.getElementById("audiosource").src = content;
       };
-      reader.readAsDataURL(event_newfile.target.files[0]);
+      reader.readAsDataURL(file);
     },
     toggle () {
       this.filtering = this.ist.toggle_filter(this.filter.center,this.filter.amp,this.filter.lfreq);
