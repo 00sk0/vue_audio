@@ -14,7 +14,7 @@ export default class {
     this.ctx.restore();
   }
   draw_internal() {
-    console.error("to be implemented");
+    throw new Error("to be implemented");
   }
   toggle () {
     this.on = !this.on;
