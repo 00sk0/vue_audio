@@ -1,8 +1,6 @@
-
-
 export default class {
   constructor () {
-    this.fft_size = 1024;
+    this.fft_size = 2048;
   }
   init ({width,height,ctx,audio,components}) {
     this.width = width;
@@ -49,7 +47,7 @@ export default class {
   }
   init_components (pos_log, comp_init) {
     const [LEN,LOGLEN] = [this.length,this.length_log];
-    const pos_linear = Array.from({length:LEN}, (v,i) => i*this.width/LEN);
+    const pos_linear = Array.from({length:LEN}, (_,i) => i*this.width/LEN);
     pos_linear.push(this.width);
     const arg_linear = {
       width: this.width,
@@ -66,11 +64,6 @@ export default class {
       ctx: this.cctx
     };
     const args = {arg_linear, arg_log};
-    // const components = [];
-    // components.push(new SpectrumAccum(arg_log));
-    // components.push(new SpectrumBar(arg_log));
-    // components.push(new SpectrumCircle(arg_log));
-    // return components;
     return comp_init.map(cp => {cp.init(args); return cp});
   }
   update_filter (freq_center,freq_amp,freq_freq) {

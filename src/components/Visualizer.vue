@@ -3,8 +3,7 @@
     <canvas id="canvas" width="640px" height="360px"></canvas>
     <div id="ctrls">
       <p>
-        <audio controls id="audiosource"
-        ></audio>
+        <audio controls id="audiosource" loop></audio>
           <!-- :src="audio_src" -->
         <input type="file" id="audiofile" accept="audio/*" v-on:change="loadAudio">
       </p>
@@ -14,15 +13,15 @@
           <label :for="cp.name">{{ cp.name }}</label>
         </span>
         |
-        Accum_interval: <input type="text" v-model="components[0].cont.interval">
+        Accum_interval: <input type="number" min="0" v-model="components[0].cont.interval">
         Accum_amp_log: <input type="checkbox" v-model="components[0].cont.f_amp_log">
       </p>
       <p>filter: {{filtering ? "on" : "off"}}.
         <button v-on:click="toggle">toggle</button></p>
       <p>
-        filter_lfo_center=<input type="text" v-model="filter.center">[Hz],
-        filter_lfo_amp=<input type="text" v-model="filter.amp">[Hz],
-        filter_lfo_freq=<input type="text" v-model="filter.lfreq">[count].
+        filter_lfo_center=<input type="number" min="1" v-model="filter.center">[Hz],
+        filter_lfo_amp=<input type="number" v-model="filter.amp">[Hz],
+        filter_lfo_freq=<input type="number" min="0" v-model="filter.lfreq">[count].
       </p>
     </div>
   </div>
@@ -99,11 +98,12 @@ export default {
 </script>
 
 <style scoped>
-input[type="text"] {
+input[type="text"], input[type="number"] {
   width: 3rem;
 }
 #canvas {
   margin: 0 auto 0;
+  border: solid 1px rgba(0,0,0,0.1);
 }
 </style>
 
