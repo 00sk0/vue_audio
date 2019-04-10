@@ -7,7 +7,7 @@ export default class extends Component {
     this.cells = 64;
     this.accum = [];
 
-    this.span = 10;
+    this.span = 3;
     this.f_amp_log = false;
   }
   init(args) {
