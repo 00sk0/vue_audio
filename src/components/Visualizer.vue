@@ -14,7 +14,8 @@
           <label :for="cp.name">{{ cp.name }}</label>
         </span>
         |
-        Accum_interval: <input type="text" v-model="components[0].cont.span">
+        Accum_interval: <input type="text" v-model="components[0].cont.interval">
+        Accum_amp_log: <input type="checkbox" v-model="components[0].cont.f_amp_log">
       </p>
       <p>filter: {{filtering ? "on" : "off"}}.
         <button v-on:click="toggle">toggle</button></p>
@@ -36,6 +37,11 @@ import SpectrumAccum from "./lib/spectrum_accum"
 export default {
   name: 'Visualizer',
   data () {
+    const components = [
+      {name: "Accum",  cont: new SpectrumAccum()},
+      {name: "Bar",    cont: new SpectrumBar()},
+      {name: "Circle", cont: new SpectrumCircle()},
+    ];
     return {
       ist: new Main(),
       filtering: false,
@@ -44,27 +50,19 @@ export default {
         amp: 500,
         lfreq: 50,
       },
-      components: [
-        {name: "Accum",  cont: new SpectrumAccum()},
-        {name: "Bar",    cont: new SpectrumBar()},
-        {name: "Circle", cont: new SpectrumCircle()},
-      ]
+      components,
+      accum_idx: components.findIndex(({name}) => name === "Accum")
       // audio_src: require("../assets/test.wav"),
     }
   },
   mounted () {
-    const cv = document.getElementById("canvas");
+    const cv    = document.getElementById("canvas");
     const audio = document.getElementById("audiosource");
     audio.addEventListener("play", () => {
       this.ist.init ({
-        width: cv.width,
+        width:  cv.width,
         height: cv.height,
         ctx: cv.getContext("2d"),
-        // components: [
-        //   new SpectrumAccum(),
-        //   new SpectrumBar(),
-        //   new SpectrumCircle()
-        // ],
         components: this.components.map(({cont}) => cont),
         audio
       })
@@ -73,7 +71,9 @@ export default {
   watch: {
     filter: {
       handler: function() {
-        this.ist.update_filter(this.filter.center,this.filter.amp,this.filter.lfreq);
+        this.ist.update_filter(
+          this.filter.center,this.filter.amp,this.filter.lfreq
+        );
       },
       deep: true
     }
@@ -90,7 +90,9 @@ export default {
       reader.readAsDataURL(file);
     },
     toggle () {
-      this.filtering = this.ist.toggle_filter(this.filter.center,this.filter.amp,this.filter.lfreq);
+      this.filtering = this.ist.toggle_filter(
+        this.filter.center,this.filter.amp,this.filter.lfreq
+      );
     },
   }
 }
