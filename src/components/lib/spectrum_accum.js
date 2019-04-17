@@ -8,7 +8,9 @@ export default class extends Component {
     this.accum = [];
 
     this.span = 3;
-    this.f_amp_log = false;
+    this.amp_kind = "linear";
+    this.log_coeff = 150;
+    this.exp_base = 1.01;
   }
   init(args) {
     super.init(args);
@@ -54,10 +56,17 @@ export default class extends Component {
           const [p,q] = [this.pos[i],this.pos[i+1]];
           const pw = (() => {
             const w = this.accum[ih][i];
-            if(this.f_amp_log) {
-              const p = 5;
-              return Math.log(w/p + 1) / Math.log(255/p + 1);
-            } else { return w / 255; }
+            switch (this.amp_kind) {
+              case "linear": { return w / 255; }
+              case "log": {
+                const p = Math.pow(1.1, this.log_coeff);
+                return Math.log(w/p + 1) / Math.log(255/p + 1);
+              }
+              case "exp": {
+                const base = this.exp_base;
+                return Math.pow(base, w-255);
+              }
+            }
           })();
           this.ctx.fillStyle=`hsla(${205 + pw * 60},60%,60%,${pw})`;
           this.ctx.fillRect(p,h,q-p,(this.height/this.cells));
