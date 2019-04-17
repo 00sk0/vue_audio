@@ -59,7 +59,7 @@ export default class extends Component {
               return Math.log(w/p + 1) / Math.log(255/p + 1);
             } else { return w / 255; }
           })();
-          this.ctx.fillStyle=`hsla(${220 + pw * 60},60%,60%,${pw})`;
+          this.ctx.fillStyle=`hsla(${205 + pw * 60},60%,60%,${pw})`;
           this.ctx.fillRect(p,h,q-p,(this.height/this.cells));
         }
       }

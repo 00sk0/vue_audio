@@ -3,7 +3,7 @@
     <canvas id="canvas" width="640px" height="360px"></canvas>
     <div id="ctrls">
       <p>
-        <audio controls id="audiosource" loop></audio>
+        <audio controls id="audiosource" loop volume="0.5"></audio>
           <!-- :src="audio_src" -->
         <input type="file" id="audiofile" accept="audio/*" v-on:change="loadAudio">
       </p>
@@ -16,12 +16,11 @@
         Accum_interval: <input type="number" min="0" v-model="components[0].cont.interval">
         Accum_amp_log: <input type="checkbox" v-model="components[0].cont.f_amp_log">
       </p>
-      <p>filter: {{filtering ? "on" : "off"}}.
-        <button v-on:click="toggle">toggle</button></p>
-      <p>
-        filter_lfo_center=<input type="number" min="1" v-model="filter.center">[Hz],
-        filter_lfo_amp=<input type="number" v-model="filter.amp">[Hz],
-        filter_lfo_freq=<input type="number" min="0" v-model="filter.lfreq">[count].
+      <p>filter:
+        <button v-on:click="toggle">{{(filtering ? "on" : "off") + " -> " + (!filtering ? "on" : "off")}}</button> 
+        lfo_center=<input type="number" min="1" v-model="filter.center">[Hz],
+        lfo_amp=<input type="number" v-model="filter.amp">[Hz],
+        lfo_freq=<input type="number" min="0" v-model="filter.lfreq">[count].
       </p>
     </div>
   </div>
@@ -57,6 +56,7 @@ export default {
   mounted () {
     const cv    = document.getElementById("canvas");
     const audio = document.getElementById("audiosource");
+    audio.volume = 0.5;
     audio.addEventListener("play", () => {
       this.ist.init ({
         width:  cv.width,

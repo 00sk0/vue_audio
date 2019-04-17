@@ -73,8 +73,8 @@ export default class {
   }
   toggle_filter (freq_center,freq_amp,freq_freq) {
     const actx = this.actx;
+    if(!this.filter) return;
     if(this.filtering) {
-      this.filtering = false;
       this.filter.frequency.cancelScheduledValues(actx.currentTime);
       this.filter.gain.cancelScheduledValues(actx.currentTime);
       this.filter.Q.cancelScheduledValues(actx.currentTime);
@@ -82,13 +82,13 @@ export default class {
       this.filter.frequency.setValueAtTime(0,actx.currentTime);
       this.filter.gain.setValueAtTime(0,actx.currentTime);
     } else {
-      this.filtering = true;
       this.filter.Q.setValueAtTime(4,actx.currentTime);
       this.filter_center = freq_center;
       this.filter_amp = freq_amp;
       this.filter_lfreq = freq_freq;
       this.filter.type = "lowpass";
     }
+    this.filtering = !this.filtering;
     return this.filtering;
   }
   loop () {
