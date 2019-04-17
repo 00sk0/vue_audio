@@ -14,7 +14,13 @@
         </span>
         |
         Accum_interval: <input type="number" min="0" v-model="components[0].cont.interval">
-        Accum_amp_log: <input type="checkbox" v-model="components[0].cont.f_amp_log">
+        Accum_amp_kind: <select v-model="components[0].cont.amp_kind">
+          <option selected>linear</option>
+          <option>log</option>
+          <option>exp</option>
+        </select>
+        Accum_log_coeff: <input type="number" min="0" v-model="components[0].cont.log_coeff">
+        Accum_exp_base: <input type="number" min="1.001" max="1.1" v-model="components[0].cont.exp_base" step="0.001">
       </p>
       <p>filter:
         <button v-on:click="toggle">{{(filtering ? "on" : "off") + " -> " + (!filtering ? "on" : "off")}}</button> 
