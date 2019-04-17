@@ -9,7 +9,7 @@ export default class extends Component {
 
     this.span = 3;
     this.amp_kind = "linear";
-    this.log_coeff = 150;
+    this.log_coeff = 32;
     this.exp_base = 1.01;
   }
   init(args) {
