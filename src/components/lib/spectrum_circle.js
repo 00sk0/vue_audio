@@ -14,7 +14,7 @@ export default class extends Component {
     this.ctx.fillStyle="hsla(120,60%,60%,0.8)";
 
     for(let i=0; i<this.length; i++) {
-      const v = buf_freq_log[i] / 255;
+      const v = buf_freq_log[i];
       let [p,q] = [
         this.pos[i]   / this.width,
         this.pos[i+1] / this.width];

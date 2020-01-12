@@ -6,7 +6,7 @@ export default class extends Component {
       const [l,r] = [
         this.pos[i],
         this.pos[i+1]];
-      const v = buf_freq_log[i] * this.height / 255;
+      const v = buf_freq_log[i] * this.height;
       this.ctx.fillRect(l,this.height - v,r-l,v);
     }
   }

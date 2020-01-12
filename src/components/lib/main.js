@@ -11,9 +11,9 @@ export default class {
     this.length = LEN;
     const [LOGLEN,xs] = this.calc_log();
     this.length_log = LOGLEN;
-    this.buf_time = new Uint8Array(LEN);
-    this.buf_freq = new Uint8Array(LEN);
-    this.buf_freq_log = new Uint8Array(LOGLEN);
+    this.buf_time = new Float32Array(LEN);
+    this.buf_freq = new Float32Array(LEN);
+    this.buf_freq_log = new Float32Array(LOGLEN);
     this.components = this.init_components(xs, components);
 
     this.filtering = false;
@@ -112,8 +112,18 @@ export default class {
     if(this.filter_count++ >= this.filter_lfreq) {
       this.filter_count = 0;
     }
-    this.anlz.getByteTimeDomainData(this.buf_time);
-    this.anlz.getByteFrequencyData(this.buf_freq);
+    this.anlz.getFloatTimeDomainData(this.buf_time);
+    this.anlz.getFloatFrequencyData(this.buf_freq);
+    const db_min = this.anlz.minDecibels,
+          db_max = this.anlz.maxDecibels;
+    this.buf_time = this.buf_time.map(v => {
+      const ratio = (v - db_min) / (db_max - db_min);
+      return Math.min(1, Math.max(0, ratio));
+    });
+    this.buf_freq = this.buf_freq.map(v =>{
+      const ratio = (v - db_min) / (db_max - db_min);
+      return Math.min(1, Math.max(0, ratio));
+    });
     this.update_buf_freq_log();
 
     const dat = {
