@@ -4,58 +4,55 @@ export default class extends Component {
     super(...arguments);
     this.idx = 0;
     this.count = 0;
-    this.cells = 64;
-    this.accum = [];
-
+    this.cells = 64; // # of histories
+    this.histories = []; // ring buffer of length this.cells
     this.span = 3;
+    this.processing = []; // data to be added to this.histories every this.span frames
+    // config
     this.amp_kind = "linear";
     this.log_coeff = 32;
     this.exp_base = 1.01;
   }
   init(args) {
     super.init(args);
-    this.tmp = [...Array(this.length)].map(_ => 0);
+    this.processing = [...Array(this.length)].map(_ => 0);
   }
   get interval () { return this.span; }
   set interval (v) {
     this.span = v;
-    this.tmp = [...Array(this.length)].map(_ => 0);
+    // discard data currently being processed
+    this.processing = [...Array(this.length)].map(_ => 0);
     this.count = 0;
   }
   draw_internal ({buf_freq_log}) {
+    // processing...
+    this.processing = this.processing.map((v,i) => v + buf_freq_log[i]);
+    // add this.processing to this.histories
     if(this.count++ >= this.span) {
-      for(let i=0; i<this.length; i++) {
-        this.tmp[i] += buf_freq_log[i];
-        if(this.span >= 1) {
-          this.tmp[i] /= this.count;
-        }
+      this.processing = this.processing.map((v) => v / this.count);
+      if(this.processing.findIndex(v => v < 0 || v > 1) >= 0) {
+        throw new Error(`invalid value: [${this.processing}]`);
       }
-      if(this.tmp.findIndex(v => v < 0 || v > 1) >= 0) {
-        throw new Error(`invalid value: [${this.tmp}]`);
-      }
-      this.accum[this.idx] = this.tmp.map(v => v);
+      this.histories[this.idx] = this.processing.map(v => v);
       this.idx ++;
-      if(this.idx === this.cells) {
+      if(this.idx === this.cells) { // ring buffer
         this.idx = 0;
       }
-      this.tmp = [...Array(this.length)].map(_ => 0);
+      this.processing = [...Array(this.length)].map(_ => 0);
       this.count = 0;
-    } else {
-      for(let i=0; i<this.length; i++) {
-        this.tmp[i] += buf_freq_log[i];
-      }
     }
     for(let cnt=0; cnt<this.cells; cnt++) {
-      const ih = (cnt+this.idx) % this.cells;
-      const h  = cnt * this.height / this.cells;
+      const ih = (cnt + this.idx) % this.cells;  // visual index of the data
+      const h  = cnt * this.height / this.cells; // actual y coord in the canvas
       if(
-        this.accum[ih]
-        && typeof this.accum[ih].find(v => v>0) !== "undefined"
+        this.histories[ih]
+        && typeof this.histories[ih].find(v => v>0) !== "undefined"
       ) {
+        // render each freq components
         for(let i=0; i<this.length; i++) {
           const [p,q] = [this.pos[i],this.pos[i+1]];
           const volume = (() => {
-            const w = this.accum[ih][i];
+            const w = this.histories[ih][i];
             console.assert(0 <= w && w <= 1);
             switch (this.amp_kind) {
               case "linear": { return w; }

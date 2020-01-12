@@ -74,7 +74,8 @@ export default class {
   toggle_filter (freq_center,freq_amp,freq_freq) {
     const actx = this.actx;
     if(!this.filter) return;
-    if(this.filtering) {
+    this.filtering = !this.filtering;
+    if(!this.filtering) {
       this.filter.frequency.cancelScheduledValues(actx.currentTime);
       this.filter.gain.cancelScheduledValues(actx.currentTime);
       this.filter.Q.cancelScheduledValues(actx.currentTime);
@@ -88,7 +89,6 @@ export default class {
       this.filter_lfreq = freq_freq;
       this.filter.type = "lowpass";
     }
-    this.filtering = !this.filtering;
     return this.filtering;
   }
   loop () {
@@ -112,8 +112,10 @@ export default class {
     if(this.filter_count++ >= this.filter_lfreq) {
       this.filter_count = 0;
     }
+    // get audio data in dB form
     this.anlz.getFloatTimeDomainData(this.buf_time);
     this.anlz.getFloatFrequencyData(this.buf_freq);
+    // map them to [0,1]
     const db_min = this.anlz.minDecibels,
           db_max = this.anlz.maxDecibels;
     this.buf_time = this.buf_time.map(v => {
@@ -124,8 +126,10 @@ export default class {
       const ratio = (v - db_min) / (db_max - db_min);
       return Math.min(1, Math.max(0, ratio));
     });
+    // tranform the freq data to logarithmic-scaled one
     this.update_buf_freq_log();
 
+    // render analyzers
     const dat = {
       buf_time: this.buf_time,
       buf_freq: this.buf_freq,
@@ -136,13 +140,14 @@ export default class {
 
     requestAnimationFrame(this.loop.bind(this));
   }
-
+  /** calculate where ith freq component locate ideally (the actual position is calculated by its caller) */
   x_calc (i) {
     if (i===0) {return 0}
     else {
       return Math.log(i) * this.width / Math.log(this.length)
     }
   }
+  /** update this.buf_freq_log */
   update_buf_freq_log () {
     let prev = 0;
     let sum_amp = 0;
@@ -153,6 +158,7 @@ export default class {
       const x = this.x_calc(i);
       const w = this.x_calc(i+1) - x;
       if (x+w - prev < 4) {
+        // too close to the previous freq component; skip
         sum_len ++;
         sum_amp += v;
       } else {
@@ -164,22 +170,18 @@ export default class {
       }
     }
   }
+  /** returns [# of freq components, where each of them locate] */
   calc_log () {
     let prev = 0;
-    // eslint-disable-next-line
-    let sum_len = 0;
     let xs = [];
     let idx = 0;
     for(let i=0; i<this.length; i++) {
       const x = this.x_calc(i);
       const w = this.x_calc(i+1) - x;
-      if (x+w - prev < 4) {
-        sum_len ++;
-      } else {
+      if (x+w - prev >= 4) { // see update_buf_freq_log
         idx ++;
         xs.push(prev);
         prev = x+w;
-        sum_len = 0;
       }
     }
     xs.push(this.width);
